@@ -7,8 +7,11 @@
   <property name="label" value="Microsoft SQL Server (Vendor Microsoft)"/>
   <property name="id" value="7E673D15-D87C-41A6-8B5F1956528C605F"/>
   -->
+
+  
   <property name="temp" location="temp"/>
   <property name="dist"  location="dist"/>
+  <property name="className" value="org.hsqldb.jdbcDriver"/>
 
   <scriptdef name="trim" language="javascript">
      <attribute name="text" />
@@ -199,21 +202,6 @@
     
     
     
-    <!-- read class info -->
-    <unzip src="${jar}" dest="${temp}">
-      <patternset>
-        <include name="META-INF/services/java.sql.Driver" />
-      </patternset>
-    </unzip>
-
-
-    
-    <loadfile property="className1"
-      srcFile="${temp}/META-INF/services/java.sql.Driver"/>
-    <!-- it is possible that more than one driver is defined (for example MySQl does so), we are only intressted uin the first one -->
-    <first text="${className1}" property="className2" default="${defaultClassName}"/>
-    <trim text="${className2}" property="className3"/>
-    <unwrap text="${className3}" property="className"/>
     
     <echo message="Driver class name:${className}"/>
 
