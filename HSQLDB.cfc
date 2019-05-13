@@ -4,7 +4,7 @@
 	)>
 	<cfset this.type.host=this.TYPE_HIDDEN>
 	
-	<cfset this.dsn="jdbc:hsqldb:file:{path}{database}">
+	<cfset this.dsn="{connection-string}">
 	<cfset this.className="{class-name}">
 	<cfset this.bundleName="{bundle-name}">
 	
