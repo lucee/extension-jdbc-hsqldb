@@ -10,3 +10,5 @@ target
 target/*
 *.lock
 *.DS_Store
+.flattened-pom.xml
+/temp
