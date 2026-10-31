@@ -123,6 +123,8 @@ jobs:
           FALLBACK_LINES: "7.0 7.1 8.0"
           # Lucee 8.0 requires this extension, so it is always tested, even when the variable has no 8.0 entry
           REQUIRED_LINES: "8.0"
+          # Lowest Lucee major version that can load this extension
+          MIN_LUCEE_MAJOR: "7"
         run: |
           set -euo pipefail
           if [[ -n "${TEST_VERSIONS// }" ]] && echo "$TEST_VERSIONS" | jq -e 'type == "array" and length > 0' > /dev/null; then
@@ -132,6 +134,9 @@ jobs:
             echo "::notice::vars.LUCEE_TEST_VERSIONS_PLUS is not available (fork pull request?), testing the latest build of: ${FALLBACK_LINES}"
             MATRIX=$(printf '%s\n' $FALLBACK_LINES | jq -R -s -c 'split("\n") | map(select(length > 0)) | map({version: (. + "/all/light"), query: (. + "/all/light")})')
           fi
+          # This extension needs Lucee 7.0 or newer (the manifest minimum), older lines cannot load it, so they are not tested.
+          # Entries without a parseable version (a named query, for example) are kept.
+          MATRIX=$(echo "$MATRIX" | jq -c --argjson min "$MIN_LUCEE_MAJOR" 'map(select(((.query // .version // "") | capture("(?<m>[0-9]+)\\.[0-9]+")? // null | if . == null then true else ((.m | tonumber) >= $min) end)))')
           for LINE in $REQUIRED_LINES; do
             if ! echo "$MATRIX" | jq -e --arg l "$LINE" 'any(.[]; ((.query // "") | startswith($l + "/")) or ((.version // "") | test("^[a-z]*-?" + ($l | gsub("\\."; "\\.")) + "\\.")))' > /dev/null; then
               echo "Adding the latest ${LINE} build to the matrix"
@@ -153,6 +158,7 @@ jobs:
     runs-on: ubuntu-latest
     needs: setup
     strategy:
+      fail-fast: false
       matrix:
         lucee: ${{ fromJSON(needs.setup.outputs.lucee_matrix) }}
     steps:
